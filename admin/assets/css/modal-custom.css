@@ -1,0 +1,116 @@
+/* Modal Minimizasyonu */
+#productModal .modal-dialog {
+    max-width: 380px;
+    /* Mobilde daha şık durması için */
+    margin: 1.75rem auto;
+    /* Ortalama */
+}
+
+#modalProductImage {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+    border-radius: 16px;
+    margin-bottom: 10px;
+}
+
+.modal-content {
+    border-radius: 16px;
+    /* Modal köşeleri */
+    border: none;
+    /* Çerçeveyi kaldır */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    /* Hafif gölge */
+    overflow: hidden;
+    /* Taşmaları gizle */
+}
+
+.modal-header {
+    padding: 0.8rem 1rem;
+    border-bottom: none;
+    /* Çizgiyi kaldır */
+    position: relative;
+    /* Kapat butonu için */
+}
+
+.modal-body {
+    padding: 0 1rem 1rem 1rem;
+}
+
+.modal-footer {
+    padding: 1rem;
+    border-top: none;
+    /* Çizgiyi kaldır */
+    display: flex;
+    gap: 10px;
+    /* Butonlar arası boşluk */
+    background: var(--light);
+    /* Hafif gri arka plan */
+}
+
+.modal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+#modalProductDescription {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0;
+    line-height: 1.4;
+}
+
+.modal-price {
+    font-size: 1.2rem !important;
+    font-weight: 700;
+    color: var(--secondary);
+    margin-bottom: 0.5rem;
+}
+
+/* Buton Stilleri */
+.modal-footer .btn {
+    border-radius: 50px;
+    /* Hap şeklinde butonlar */
+    padding: 8px 20px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.modal-footer .btn-secondary {
+    background-color: #ecf0f1;
+    color: var(--text);
+    border: none;
+}
+
+.modal-footer .btn-secondary:hover {
+    background-color: #bdc3c7;
+    color: var(--text);
+}
+
+.modal-footer .btn-primary {
+    background: linear-gradient(45deg, var(--secondary), var(--secondary));
+    border: none;
+    box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
+    flex-grow: 1;
+    /* Sepete ekle butonu geniş olsun */
+}
+
+.modal-footer .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(230, 126, 34, 0.4);
+}
+
+/* Kapat butonu (x) özelleştirme */
+.modal-header .btn-close {
+    background-size: 0.8em;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+.modal-header .btn-close:hover {
+    opacity: 1;
+}
