@@ -25,19 +25,19 @@ incrementPageViews($db);
     <link rel="canonical"
         href="<?php echo 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>">
     <title><?php echo $settings['site_title'] ?? 'QR Menü Sistemi'; ?></title>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap"
         as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap"
             rel="stylesheet">
     </noscript>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"
         media="print" onload="this.media='all'">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="admin/assets/css/front.css" rel="stylesheet">
+    <link href="admin/assets/css/front.css?v=<?= time(); ?>" rel="stylesheet">
     <link href="admin/assets/css/animation.css" rel="stylesheet">
-    <link href="admin/assets/css/modal-custom.css" rel="stylesheet">
+    <link href="admin/assets/css/modal-custom.css?v=<?= time(); ?>" rel="stylesheet">
 
     <?php
     $settingsQuery = $db->query("SELECT * FROM settings");
@@ -69,7 +69,7 @@ incrementPageViews($db);
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
+    <nav class="navbar navbar-expand-lg sticky-top glass-navbar">
         <div class="container position-relative d-flex justify-content-center align-items-center">
 
             <!-- Logo / Brand -->
@@ -87,11 +87,10 @@ incrementPageViews($db);
             </div>
 
         </div>
-        <div class="gtranslate_wrapper"></div>
     </nav>
 
     <!-- Mobil Yatay Kategori Menüsü -->
-    <div class="mobile-category-nav">
+    <div class="mobile-category-nav glass-category-nav">
         <div class="container">
             <div class="scroll-menu">
                 <a href="index.php"

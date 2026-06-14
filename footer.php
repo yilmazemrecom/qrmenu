@@ -192,6 +192,114 @@ $settings = $settingsQuery->fetch(PDO::FETCH_ASSOC);
     </div>
 </div>
 
+<!-- Premium Ürün Detay Modalı (Centered Layout / Desktop Split) -->
+<div class="modal fade premium-product-modal" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="product-modal-layout">
+                    <!-- Görsel Alanı -->
+                    <div class="product-modal-image-wrapper">
+                        <img id="modalProductImage" src="" alt="Ürün Resmi">
+                    </div>
+                    
+                    <!-- Bilgi Alanı -->
+                    <div class="product-modal-details-wrapper">
+                        <div class="product-modal-badges" id="modalProductBadges"></div>
+                        <h4 id="modalProductName" class="product-modal-title"></h4>
+                        <div class="product-modal-description-scroll">
+                            <p id="modalProductDescription" class="product-modal-description"></p>
+                        </div>
+                        
+                        <div class="product-modal-footer">
+                            <div class="product-modal-price-container">
+                                <span class="product-modal-price-label">Fiyat</span>
+                                <span class="product-modal-price"><span id="modalProductPrice"></span> ₺</span>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-add-to-cart" id="modalAddToCartBtn">
+                                <i class="fas fa-shopping-basket me-2"></i>Sepete Ekle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var productModal = document.getElementById('productModal');
+    if (productModal) {
+        productModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            if (!button) return;
+
+            var id = button.getAttribute('data-id');
+            var name = button.getAttribute('data-name');
+            var image = button.getAttribute('data-image');
+            var price = button.getAttribute('data-price');
+            var description = button.getAttribute('data-description');
+            
+            var isNew = button.getAttribute('data-is-new') === '1';
+            var isRecommended = button.getAttribute('data-is-recommended') === '1';
+            var isVegan = button.getAttribute('data-is-vegan') === '1';
+
+            // Modal içindeki öğeleri güncelle
+            document.getElementById('modalProductName').textContent = name;
+            document.getElementById('modalProductImage').src = image;
+            document.getElementById('modalProductPrice').textContent = price;
+            document.getElementById('modalProductDescription').textContent = description || 'Bu ürün için henüz bir açıklama eklenmemiş.';
+
+            // Badgeleri güncelle
+            var badgeContainer = document.getElementById('modalProductBadges');
+            if (badgeContainer) {
+                badgeContainer.innerHTML = '';
+                if (isRecommended) {
+                    badgeContainer.innerHTML += '<span class="badge-pill recommended-pill me-1">Önerilen</span>';
+                }
+                if (isNew) {
+                    badgeContainer.innerHTML += '<span class="badge-pill new-pill me-1">Yeni</span>';
+                }
+                if (isVegan) {
+                    badgeContainer.innerHTML += '<span class="badge-pill vegan-pill me-1">Vegan</span>';
+                }
+            }
+
+            // Sepete Ekle Butonunu Ayarla
+            var addToCartBtn = document.getElementById('modalAddToCartBtn');
+            if (addToCartBtn) {
+                addToCartBtn.onclick = function () {
+                    addToCart(id, name, price, image);
+
+                    // Modalı kapat
+                    var productModalInstance = bootstrap.Modal.getInstance(productModal);
+                    if (productModalInstance) {
+                        productModalInstance.hide();
+                    }
+
+                    // Sepet modalını aç
+                    setTimeout(function () {
+                        var cartModalEl = document.getElementById('cartModal');
+                        if (cartModalEl) {
+                            var cartModalInstance = bootstrap.Modal.getInstance(cartModalEl) || new bootstrap.Modal(cartModalEl);
+                            cartModalInstance.show();
+                        }
+                    }, 300);
+                };
+            }
+        });
+    }
+});
+</script>
+
+<div class="gtranslate_wrapper"></div>
 <script src="assets/js/search.js"></script>
 </body>
 

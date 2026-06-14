@@ -2,6 +2,70 @@
 // Ayarları yükle  
 $settings = $db->query("SELECT * FROM settings")->fetch(PDO::FETCH_ASSOC);
 
+// Veritabanı Temizleme İşlemi
+if (isset($_POST['db_cleanup'])) {
+    validateCSRFToken($_POST['csrf_token']);
+    
+    $clean_range = clean($_POST['clean_range']);
+    $clear_orders = isset($_POST['clear_orders']) ? 1 : 0;
+    $clear_waiter = isset($_POST['clear_waiter']) ? 1 : 0;
+    
+    if (!$clear_orders && !$clear_waiter) {
+        $_SESSION['error'] = "Lütfen temizlemek istediğiniz veri türlerinden en az birini seçin.";
+        header("Location: ?page=settings");
+        exit;
+    }
+    
+    // Zaman filtresi koşulunu oluştur
+    $date_condition = "";
+    if ($clean_range === 'week') {
+        $date_condition = "AND created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)";
+        $date_condition_waiter = "WHERE created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)";
+    } elseif ($clean_range === 'month') {
+        $date_condition = "AND created_at < DATE_SUB(NOW(), INTERVAL 30 DAY)";
+        $date_condition_waiter = "WHERE created_at < DATE_SUB(NOW(), INTERVAL 30 DAY)";
+    } else {
+        // 'all' - tümü
+        $date_condition = "";
+        $date_condition_waiter = "";
+    }
+    
+    try {
+        $db->beginTransaction();
+        $deleted_count = 0;
+        
+        // 1. Siparişleri temizle
+        if ($clear_orders) {
+            // Önce ilişkisel order_items kayıtlarını sil (yabancı anahtar çakışmasını veya artık veriyi önlemek için)
+            $subquery = "SELECT id FROM orders WHERE status IN ('completed', 'cancelled') $date_condition";
+            $stmtItems = $db->query($subquery);
+            $order_ids = $stmtItems->fetchAll(PDO::FETCH_COLUMN);
+            
+            if (!empty($order_ids)) {
+                $in_clause = implode(',', array_map('intval', $order_ids));
+                $db->exec("DELETE FROM order_items WHERE order_id IN ($in_clause)");
+                $stmtOrders = $db->exec("DELETE FROM orders WHERE id IN ($in_clause)");
+                $deleted_count += $stmtOrders;
+            }
+        }
+        
+        // 2. Garson Çağrılarını temizle
+        if ($clear_waiter) {
+            $stmtWaiter = $db->exec("DELETE FROM waiter_calls $date_condition_waiter");
+            $deleted_count += $stmtWaiter;
+        }
+        
+        $db->commit();
+        $_SESSION['success'] = "Veritabanı temizleme işlemi başarıyla tamamlandı. Toplam $deleted_count kayıt silindi.";
+    } catch (PDOException $e) {
+        $db->rollBack();
+        $_SESSION['error'] = "Veritabanı temizleme sırasında hata oluştu: " . $e->getMessage();
+    }
+    
+    header("Location: ?page=settings");
+    exit;
+}
+
 // Ayarları güncelle  
 if (isset($_POST['update_settings'])) {
     $site_title = clean($_POST['site_title']);
@@ -170,4 +234,98 @@ if (isset($_POST['update_settings'])) {
             </form>
         </div>
     </div>
+
+    <!-- Veritabanı Bakımı ve Temizliği Bölümü -->
+    <div class="card mt-4 mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="card-title mb-0"><i class="fas fa-database me-2"></i>Veritabanı Bakımı ve Temizliği</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning d-flex align-items-center" role="alert">
+                <i class="fas fa-exclamation-triangle fa-2x me-3 text-danger"></i>
+                <div>
+                    <strong>DİKKAT:</strong> Bu işlem seçtiğiniz kriterlere uyan verileri <strong>kalıcı olarak silecektir</strong> ve bu işlem geri alınamaz! Lütfen silme kriterlerini doğru seçtiğinizden emin olun.
+                </div>
+            </div>
+
+            <form action="?page=settings" method="post" id="cleanupForm" onsubmit="return confirmCleanup();">
+                <input type="hidden" name="csrf_token" value="<?php echo createCSRFToken(); ?>">
+                <input type="hidden" name="db_cleanup" value="1">
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Zaman Aralığı</label>
+                        <select class="form-select" name="clean_range" id="clean_range" required>
+                            <option value="week">1 Haftadan Eski Veriler</option>
+                            <option value="month" selected>1 Aydan Eski Veriler</option>
+                            <option value="all">Tüm Zamanlar (Her Şeyi Sil)</option>
+                        </select>
+                        <div class="form-text">Seçilen zaman diliminden daha eski olan kayıtlar silinecektir.</div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold d-block">Silinecek Veri Tipleri</label>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" name="clear_orders" id="clear_orders" value="1" checked>
+                            <label class="form-check-label" for="clear_orders">
+                                Tamamlanan ve İptal Edilen Siparişler <span class="text-muted">(Sipariş Ürünleriyle Birlikte)</span>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="clear_waiter" id="clear_waiter" value="1" checked>
+                            <label class="form-check-label" for="clear_waiter">
+                                Garson Çağrı Geçmişi
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end border-top pt-3 mt-3">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-2"></i>Temizlemeyi Başlat
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+<script>
+function confirmCleanup() {
+    const clearOrders = document.getElementById('clear_orders').checked;
+    const clearWaiter = document.getElementById('clear_waiter').checked;
+    const cleanRange = document.getElementById('clean_range');
+    const rangeText = cleanRange.options[cleanRange.selectedIndex].text;
+
+    if (!clearOrders && !clearWaiter) {
+        alert("Lütfen temizlenecek veri türlerinden en az birini seçin!");
+        return false;
+    }
+
+    let selectedData = [];
+    if (clearOrders) selectedData.push("Siparişler");
+    if (clearWaiter) selectedData.push("Garson Çağrıları");
+
+    // Birinci aşama onay
+    const firstConfirm = confirm(
+        "Kritik Uyarı:\n\n" +
+        "Kapsam: " + selectedData.join(" ve ") + "\n" +
+        "Zaman Kriteri: " + rangeText + "\n\n" +
+        "Bu verilere uyan kayıtlar kalıcı olarak silinecektir! Devam etmek istiyor musunuz?"
+    );
+
+    if (!firstConfirm) return false;
+
+    // İkinci aşama kesin onay (Eğer 'Tüm Zamanlar' seçildiyse)
+    if (cleanRange.value === 'all') {
+        const secondConfirm = confirm(
+            "SON UYARI:\n\n" +
+            "Sistemdeki seçilen tüm veriler (Tüm Zamanlar) geri getirilemez şekilde silinecektir!\n" +
+            "Devam etmek için onaylıyor musunuz?"
+        );
+        return secondConfirm;
+    }
+
+    return true;
+}
+</script>

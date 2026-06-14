@@ -143,7 +143,7 @@ if (count($new_products) > 0):
         <div class="row g-2">
             <?php foreach ($new_products as $product): ?>
                 <div class="col-lg-4 col-md-6 col-6">
-                    <?php echo renderProductCard($product, $settings); ?>
+                    <?php echo renderProductCard($product, $settings, [], [], [], true); ?>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -177,7 +177,7 @@ foreach ($categories as $category):
             </div>
             <div class="row g-2">
                 <?php foreach ($products as $product): ?>
-                    <div class="col-lg-4 col-md-6 col-6">
+                    <div class="col-12 col-md-6 col-lg-4">
                         <?php echo renderProductCard($product, $settings); ?>
                     </div>
                 <?php endforeach; ?>
@@ -187,27 +187,6 @@ foreach ($categories as $category):
     endif;
 endforeach;
 ?>
-</div>
-<!-- Ürün Detay Modal -->
-<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="productModalLabel">Ürün Detayı</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <img id="modalProductImage" src="" alt="Ürün Resmi">
-                <h4 id="modalProductName"></h4>
-                <p class="modal-price"><strong><span id="modalProductPrice"></span> ₺</strong></p>
-                <p id="modalProductDescription"></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
-                <button type="button" class="btn btn-primary" id="modalAddToCartBtn">Sepete Ekle</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 
@@ -227,46 +206,6 @@ require_once 'footer.php';
 
 
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var productModal = document.getElementById('productModal');
-
-        productModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;  // Tıklanan ürün kartı
-            if (!button) return; // Fix: Check if button exists (for manual JS calls)
-
-            var id = button.getAttribute('data-id');
-            var name = button.getAttribute('data-name');
-            var image = button.getAttribute('data-image');
-            var price = button.getAttribute('data-price');
-            var description = button.getAttribute('data-description');
-
-            // Modal içindeki öğeleri güncelle
-            document.getElementById('modalProductName').textContent = name;
-            document.getElementById('modalProductImage').src = image;
-            document.getElementById('modalProductPrice').textContent = price;
-            document.getElementById('modalProductDescription').textContent = description;
-
-            // Sepete Ekle Butonunu Ayarla
-            var addToCartBtn = document.getElementById('modalAddToCartBtn');
-            addToCartBtn.onclick = function () {
-                addToCart(id, name, price, image);
-
-                // Modalları Yönet
-                var productModalEl = document.getElementById('productModal');
-                var productModalInstance = bootstrap.Modal.getInstance(productModalEl);
-                productModalInstance.hide();
-
-                // Sepet modalını aç
-                setTimeout(function () {
-                    var cartModalEl = document.getElementById('cartModal');
-                    var cartModalInstance = new bootstrap.Modal(cartModalEl);
-                    cartModalInstance.show();
-                }, 300);
-            };
-        });
-    });
-</script>
 
 
 <script>

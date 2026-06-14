@@ -247,95 +247,133 @@ function getVeganProducts($db)
 
 
 // Ürün Kartı Render Fonksiyonu
-function renderProductCard($product, $settings, $recommended_ids = [], $new_ids = [], $vegan_ids = [], $is_slider = false)
+function renderProductCard($product, $settings, $recommended_ids = [], $new_ids = [], $vegan_ids = [], $is_vertical = false)
 {
     // Resim yolunu belirle
     $image_path = !empty($product['image']) ? UPLOAD_DIR . $product['image'] : (isset($settings['logo']) ? UPLOAD_DIR . $settings['logo'] : 'admin/assets/img/no-image.jpg');
 
-    // Ürün özelliklerini kontrol et
-    // ID kontrolü için array_map ile int dönüşümü gerekebilir veya direkt kontrol
-    // Burada product['id'] string gelebilir, o yüzden loose comparison veya dönüşüm faydalı olabilir
     $p_id = $product['id'];
 
     $is_recommended = in_array($p_id, $recommended_ids) || (isset($product['is_recommended']) && $product['is_recommended'] == 1);
     $is_new = in_array($p_id, $new_ids) || (isset($product['is_new']) && $product['is_new'] == 1);
     $is_vegan = in_array($p_id, $vegan_ids) || (isset($product['is_vegan']) && $product['is_vegan'] == 1);
 
-    // HTML sınıfları ve yapıları
-    $card_class = $is_slider ? 'product-card-slider' : 'product-card';
-    $image_container_class = $is_slider ? 'product-image-container-slider' : 'product-image-container';
-    $image_class = $is_slider ? 'product-image-slider' : 'product-image';
-    $price_class = $is_slider ? 'price-tag-slider' : 'price-tag';
-    $badge_container_class = $is_slider ? 'badge-container-slider' : 'badge-container';
-    $info_class = $is_slider ? 'product-info-slider' : 'product-info';
-    $title_class = $is_slider ? 'product-title-slider' : 'product-title';
-
     // Açıklama kısaltma
     $description = !empty($product['description']) ? htmlspecialchars($product['description']) : ' ';
     $short_desc = '';
-    if (!$is_slider && !empty($product['description'])) {
-        $short_desc = strlen($product['description']) > 20 ? substr(htmlspecialchars($product['description']), 0, 20) . '...' : htmlspecialchars($product['description']);
+    if (!empty($product['description'])) {
+        $short_desc = mb_strlen($product['description'], 'UTF-8') > 35 ? mb_substr(htmlspecialchars($product['description']), 0, 35, 'UTF-8') . '...' : htmlspecialchars($product['description']);
     }
 
-    // İsim kısaltma (Slider için)
     $name = htmlspecialchars($product['name']);
     $display_name = $name;
-    if ($is_slider && strlen($name) > 18) {
-        $display_name = substr($name, 0, 18) . '...';
+    if ($is_vertical && mb_strlen($name, 'UTF-8') > 24) {
+        $display_name = mb_substr($name, 0, 24, 'UTF-8') . '...';
     }
 
     ob_start();
-    ?>
-    <div class="<?php echo $card_class; ?>">
-
-        <!-- Görsel Alanı - Modalı Tetikler -->
-        <div class="<?php echo $image_container_class; ?>" style="cursor: pointer;" data-bs-toggle="modal"
-            data-bs-target="#productModal" data-id="<?php echo $p_id; ?>" data-name="<?php echo $name; ?>"
-            data-image="<?php echo $image_path; ?>" data-price="<?php echo number_format($product['price'], 2); ?>"
-            data-description="<?php echo $description; ?>" data-is-new="<?php echo $is_new ? '1' : '0'; ?>"
-            data-is-recommended="<?php echo $is_recommended ? '1' : '0'; ?>"
-            data-is-vegan="<?php echo $is_vegan ? '1' : '0'; ?>">
-
-            <img src="<?php echo $image_path; ?>" class="<?php echo $image_class; ?>" alt="<?php echo $name; ?>"
-                loading="lazy">
-            <div class="<?php echo $price_class; ?>"><?php echo number_format($product['price'], 2); ?> ₺</div>
-            <div class="<?php echo $badge_container_class; ?>">
-                <?php if ($is_recommended): ?>
-                    <div class="badge recommended-badge">Önerilen</div>
-                <?php endif; ?>
-                <?php if ($is_new): ?>
-                    <div class="badge new-badge">Yeni</div>
-                <?php endif; ?>
-                <?php if ($is_vegan): ?>
-                    <div class="badge vegan-badge">Vegan</div>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Bilgi Alanı -->
-        <div class="<?php echo $info_class; ?>">
-            <!-- Başlık ve Açıklama - Modalı Tetikler -->
-            <div style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#productModal"
-                data-id="<?php echo $p_id; ?>" data-name="<?php echo $name; ?>" data-image="<?php echo $image_path; ?>"
-                data-price="<?php echo number_format($product['price'], 2); ?>"
+    if ($is_vertical): ?>
+        <!-- DİKEY KART TASARIMI (Slider ve Öne Çıkanlar İçin) -->
+        <div class="product-card-vertical" data-id="<?php echo $p_id; ?>" data-is-new="<?php echo $is_new ? '1' : '0'; ?>" data-is-recommended="<?php echo $is_recommended ? '1' : '0'; ?>" data-is-vegan="<?php echo $is_vegan ? '1' : '0'; ?>">
+            <!-- Görsel Alanı - Modalı Tetikler -->
+            <div class="product-image-container-vertical" style="cursor: pointer;" data-bs-toggle="modal"
+                data-bs-target="#productModal" data-id="<?php echo $p_id; ?>" data-name="<?php echo $name; ?>"
+                data-image="<?php echo $image_path; ?>" data-price="<?php echo number_format($product['price'], 2); ?>"
                 data-description="<?php echo $description; ?>" data-is-new="<?php echo $is_new ? '1' : '0'; ?>"
                 data-is-recommended="<?php echo $is_recommended ? '1' : '0'; ?>"
                 data-is-vegan="<?php echo $is_vegan ? '1' : '0'; ?>">
-
-                <h3 class="<?php echo $title_class; ?>"><?php echo $display_name; ?></h3>
-                <?php if (!$is_slider && !empty($short_desc)): ?>
-                    <p class="product-description"><?php echo $short_desc; ?></p>
-                <?php endif; ?>
+                
+                <img src="<?php echo $image_path; ?>" class="product-image-vertical" alt="<?php echo $name; ?>" loading="lazy">
+                
+                <!-- Badgeler görselin üzerinde sol üstte asılı olacak -->
+                <div class="badge-overlay-vertical">
+                    <?php if ($is_recommended): ?>
+                        <span class="badge-pill recommended-pill">Önerilen</span>
+                    <?php endif; ?>
+                    <?php if ($is_new): ?>
+                        <span class="badge-pill new-pill">Yeni</span>
+                    <?php endif; ?>
+                    <?php if ($is_vegan): ?>
+                        <span class="badge-pill vegan-pill">Vegan</span>
+                    <?php endif; ?>
+                </div>
             </div>
 
-            <!-- Buton - Modalı Tetiklemez -->
-            <button class="btn btn-sm btn-outline-primary mt-2 w-100"
-                onclick="addToCart(<?php echo $p_id; ?>, '<?php echo addslashes($display_name); ?>', <?php echo $product['price']; ?>, '<?php echo $image_path; ?>')">
-                <i class="fas fa-shopping-basket me-1"></i> Sepete Ekle
-            </button>
+            <!-- Bilgi Alanı -->
+            <div class="product-info-vertical">
+                <div class="product-details-vertical" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#productModal"
+                    data-id="<?php echo $p_id; ?>" data-name="<?php echo $name; ?>" data-image="<?php echo $image_path; ?>"
+                    data-price="<?php echo number_format($product['price'], 2); ?>"
+                    data-description="<?php echo $description; ?>" data-is-new="<?php echo $is_new ? '1' : '0'; ?>"
+                    data-is-recommended="<?php echo $is_recommended ? '1' : '0'; ?>"
+                    data-is-vegan="<?php echo $is_vegan ? '1' : '0'; ?>">
+                    
+                    <h3 class="product-title-vertical"><?php echo $display_name; ?></h3>
+                    <?php if (!empty($short_desc)): ?>
+                        <p class="product-description-vertical"><?php echo $short_desc; ?></p>
+                    <?php endif; ?>
+                </div>
+
+                <div class="product-footer-vertical">
+                    <span class="product-price-vertical"><?php echo number_format($product['price'], 2, ',', '.'); ?> ₺</span>
+                    <button class="btn btn-add-vertical" onclick="addToCart(<?php echo $p_id; ?>, '<?php echo addslashes($name); ?>', <?php echo $product['price']; ?>, '<?php echo $image_path; ?>')">
+                        <i class="fas fa-plus"></i><span class="d-none d-sm-inline ms-1">Ekle</span>
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
-    <?php
+    <?php else: ?>
+        <!-- YATAY KART TASARIMI (Normal Kategoriler İçin) -->
+        <div class="product-card-horizontal" data-id="<?php echo $p_id; ?>" data-is-new="<?php echo $is_new ? '1' : '0'; ?>" data-is-recommended="<?php echo $is_recommended ? '1' : '0'; ?>" data-is-vegan="<?php echo $is_vegan ? '1' : '0'; ?>">
+            <!-- Görsel Alanı - Modalı Tetikler -->
+            <div class="product-image-container-horizontal" style="cursor: pointer;" data-bs-toggle="modal"
+                data-bs-target="#productModal" data-id="<?php echo $p_id; ?>" data-name="<?php echo $name; ?>"
+                data-image="<?php echo $image_path; ?>" data-price="<?php echo number_format($product['price'], 2); ?>"
+                data-description="<?php echo $description; ?>" data-is-new="<?php echo $is_new ? '1' : '0'; ?>"
+                data-is-recommended="<?php echo $is_recommended ? '1' : '0'; ?>"
+                data-is-vegan="<?php echo $is_vegan ? '1' : '0'; ?>">
+                <img src="<?php echo $image_path; ?>" class="product-image-horizontal" alt="<?php echo $name; ?>" loading="lazy">
+            </div>
+
+            <!-- Bilgi ve Eylem Alanı -->
+            <div class="product-info-horizontal">
+                <div class="product-details-horizontal" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#productModal"
+                    data-id="<?php echo $p_id; ?>" data-name="<?php echo $name; ?>" data-image="<?php echo $image_path; ?>"
+                    data-price="<?php echo number_format($product['price'], 2); ?>"
+                    data-description="<?php echo $description; ?>" data-is-new="<?php echo $is_new ? '1' : '0'; ?>"
+                    data-is-recommended="<?php echo $is_recommended ? '1' : '0'; ?>"
+                    data-is-vegan="<?php echo $is_vegan ? '1' : '0'; ?>">
+                    
+                    <div class="product-title-row">
+                        <h3 class="product-title-horizontal"><?php echo $name; ?></h3>
+                    </div>
+                    
+                    <div class="product-badge-list-horizontal">
+                        <?php if ($is_recommended): ?>
+                            <span class="badge-pill-horizontal recommended-pill-horizontal">Önerilen</span>
+                        <?php endif; ?>
+                        <?php if ($is_new): ?>
+                            <span class="badge-pill-horizontal new-pill-horizontal">Yeni</span>
+                        <?php endif; ?>
+                        <?php if ($is_vegan): ?>
+                            <span class="badge-pill-horizontal vegan-pill-horizontal">Vegan</span>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <?php if (!empty($product['description'])): ?>
+                        <p class="product-description-horizontal"><?php echo (mb_strlen($product['description'], 'UTF-8') > 50 ? mb_substr(htmlspecialchars($product['description']), 0, 50, 'UTF-8') . '...' : htmlspecialchars($product['description'])); ?></p>
+                    <?php endif; ?>
+                </div>
+
+                <div class="product-footer-horizontal">
+                    <span class="product-price-horizontal"><?php echo number_format($product['price'], 2, ',', '.'); ?> ₺</span>
+                    <button class="btn btn-add-horizontal" onclick="addToCart(<?php echo $p_id; ?>, '<?php echo addslashes($name); ?>', <?php echo $product['price']; ?>, '<?php echo $image_path; ?>')">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    <?php endif;
     return ob_get_clean();
 }
 ?>
