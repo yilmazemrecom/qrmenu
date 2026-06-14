@@ -51,6 +51,7 @@ if (isset($_POST['edit_slider'])) {
 
     // Resim yükleme kontrolü
     $image_update = '';
+    $new_image = '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
         $new_image = uploadFile($_FILES['image']);
         if ($new_image) {
@@ -106,6 +107,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
 
 // Sliderları listele
 $sliders = $db->query("SELECT * FROM slider_images ORDER BY sort_order ASC, id DESC")->fetchAll(PDO::FETCH_ASSOC);
+
+// Kategorileri çek (Modal içinde kullanmak için)
+$categories = $db->query("SELECT * FROM categories WHERE status = 1 ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <div class="container-fluid">
@@ -176,7 +180,8 @@ $sliders = $db->query("SELECT * FROM slider_images ORDER BY sort_order ASC, id D
                                             <i class="fas fa-edit"></i><span class="d-none d-lg-inline"> Düzenle</span>
                                         </button>
                                         <a href="?page=slider&action=delete&id=<?php echo $slider['id']; ?>"
-                                            class="btn btn-sm btn-danger delete-btn">
+                                            class="btn btn-sm btn-danger"
+                                            onclick="return confirmAction(this, 'Bu slider\'ı silmek istediğinizden emin misiniz?');">
                                             <i class="fas fa-trash"></i><span class="d-none d-lg-inline"> Sil</span>
                                         </a>
                                     </div>
@@ -271,24 +276,8 @@ $sliders = $db->query("SELECT * FROM slider_images ORDER BY sort_order ASC, id D
     </div>
 </div>
 
-<script>
-    // Silme onayı
-    document.addEventListener('DOMContentLoaded', function () {
-        const deleteButtons = document.querySelectorAll('.delete-btn');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function (e) {
-                if (!confirm('Bu slider\'ı silmek istediğinizden emin misiniz?')) {
-                    e.preventDefault();
-                }
-            });
-        });
-    });
-</script>
 
-<?php
-// Kategorileri çek (Modal içinde kullanmak için)
-$categories = $db->query("SELECT * FROM categories WHERE status = 1 ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
-?>
+
 
 <!-- Yeni Slider Ekleme Modal -->
 <div class="modal fade" id="addSliderModal">

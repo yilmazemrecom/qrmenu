@@ -247,7 +247,7 @@ if (isset($_POST['update_settings'])) {
                 </div>
             </div>
 
-            <form action="?page=settings" method="post" id="cleanupForm" onsubmit="return confirmCleanup();">
+            <form action="?page=settings" method="post" id="cleanupForm" onsubmit="return confirmCleanup(event);">
                 <input type="hidden" name="csrf_token" value="<?php echo createCSRFToken(); ?>">
                 <input type="hidden" name="db_cleanup" value="1">
 
@@ -290,14 +290,29 @@ if (isset($_POST['update_settings'])) {
 </div>
 
 <script>
-function confirmCleanup() {
+function confirmCleanup(e) {
+    e.preventDefault(); // Prevent standard submission immediately
+    
+    const form = document.getElementById('cleanupForm');
     const clearOrders = document.getElementById('clear_orders').checked;
     const clearWaiter = document.getElementById('clear_waiter').checked;
     const cleanRange = document.getElementById('clean_range');
     const rangeText = cleanRange.options[cleanRange.selectedIndex].text;
 
     if (!clearOrders && !clearWaiter) {
-        alert("Lütfen temizlenecek veri türlerinden en az birini seçin!");
+        Swal.fire({
+            title: 'Hata!',
+            text: 'Lütfen temizlenecek veri türlerinden en az birini seçin!',
+            icon: 'warning',
+            confirmButtonText: 'Tamam',
+            confirmButtonColor: '#0071e3',
+            background: '#ffffff',
+            customClass: {
+                popup: 'swal2-apple-popup',
+                confirmButton: 'btn btn-primary px-4 py-2'
+            },
+            buttonsStyling: false
+        });
         return false;
     }
 
@@ -306,25 +321,53 @@ function confirmCleanup() {
     if (clearWaiter) selectedData.push("Garson Çağrıları");
 
     // Birinci aşama onay
-    const firstConfirm = confirm(
-        "Kritik Uyarı:\n\n" +
-        "Kapsam: " + selectedData.join(" ve ") + "\n" +
-        "Zaman Kriteri: " + rangeText + "\n\n" +
-        "Bu verilere uyan kayıtlar kalıcı olarak silinecektir! Devam etmek istiyor musunuz?"
-    );
+    Swal.fire({
+        title: 'Kritik Uyarı!',
+        html: `Kapsam: <strong>${selectedData.join(" ve ")}</strong><br>Zaman Kriteri: <strong>${rangeText}</strong><br><br>Bu verilere uyan kayıtlar kalıcı olarak silinecektir! Devam etmek istiyor musunuz?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ff3b30',
+        cancelButtonColor: '#86868b',
+        confirmButtonText: 'Evet, Devam Et',
+        cancelButtonText: 'İptal',
+        background: '#ffffff',
+        customClass: {
+            popup: 'swal2-apple-popup',
+            confirmButton: 'btn btn-danger px-4 py-2',
+            cancelButton: 'btn btn-light text-dark px-4 py-2 border'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // İkinci aşama kesin onay (Eğer 'Tüm Zamanlar' seçildiyse)
+            if (cleanRange.value === 'all') {
+                Swal.fire({
+                    title: 'SON UYARI!',
+                    text: 'Sistemdeki seçilen tüm veriler (Tüm Zamanlar) geri getirilemez şekilde silinecektir! Devam etmek istediğinize kesin olarak emin misiniz?',
+                    icon: 'error',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ff3b30',
+                    cancelButtonColor: '#86868b',
+                    confirmButtonText: 'Evet, Her Şeyi Sil!',
+                    cancelButtonText: 'Vazgeç',
+                    background: '#ffffff',
+                    customClass: {
+                        popup: 'swal2-apple-popup',
+                        confirmButton: 'btn btn-danger px-4 py-2',
+                        cancelButton: 'btn btn-light text-dark px-4 py-2 border'
+                    },
+                    buttonsStyling: false
+                }).then((secondResult) => {
+                    if (secondResult.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            } else {
+                form.submit();
+            }
+        }
+    });
 
-    if (!firstConfirm) return false;
-
-    // İkinci aşama kesin onay (Eğer 'Tüm Zamanlar' seçildiyse)
-    if (cleanRange.value === 'all') {
-        const secondConfirm = confirm(
-            "SON UYARI:\n\n" +
-            "Sistemdeki seçilen tüm veriler (Tüm Zamanlar) geri getirilemez şekilde silinecektir!\n" +
-            "Devam etmek için onaylıyor musunuz?"
-        );
-        return secondConfirm;
-    }
-
-    return true;
+    return false;
 }
 </script>

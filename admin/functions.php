@@ -16,7 +16,26 @@ if (!function_exists('clean')) {
 if (!function_exists('successMessage')) {
     function successMessage($message)
     {
-        return '<div class="alert alert-success">' . clean($message) . '</div>';
+        $cleanMessage = addslashes(clean($message));
+        return "
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: 'Başarılı!',
+                    text: '{$cleanMessage}',
+                    icon: 'success',
+                    confirmButtonText: 'Tamam',
+                    confirmButtonColor: '#0071e3',
+                    background: '#ffffff',
+                    customClass: {
+                        popup: 'swal2-apple-popup',
+                        confirmButton: 'btn btn-primary px-4 py-2'
+                    },
+                    buttonsStyling: false
+                });
+            });
+        </script>
+        ";
     }
 }
 
@@ -24,7 +43,26 @@ if (!function_exists('successMessage')) {
 if (!function_exists('errorMessage')) {
     function errorMessage($message)
     {
-        return '<div class="alert alert-danger">' . clean($message) . '</div>';
+        $cleanMessage = addslashes(clean($message));
+        return "
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: 'Hata!',
+                    text: '{$cleanMessage}',
+                    icon: 'error',
+                    confirmButtonText: 'Tamam',
+                    confirmButtonColor: '#ff3b30',
+                    background: '#ffffff',
+                    customClass: {
+                        popup: 'swal2-apple-popup',
+                        confirmButton: 'btn btn-danger px-4 py-2'
+                    },
+                    buttonsStyling: false
+                });
+            });
+        </script>
+        ";
     }
 }
 

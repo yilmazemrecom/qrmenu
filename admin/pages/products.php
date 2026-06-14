@@ -152,10 +152,11 @@ $products = $db->query("
                                         data-bs-target="#editProductModal<?php echo $product['id']; ?>">  
                                     <i class="fas fa-edit"></i><span class="d-none d-lg-inline"> Düzenle</span>
                                 </button>  
-                                <form action="?page=products" method="POST" class="d-inline" onsubmit="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">
+                                <form action="?page=products" method="POST" class="d-inline">
                                     <input type="hidden" name="csrf_token" value="<?php echo createCSRFToken(); ?>">
                                     <input type="hidden" name="id" value="<?php echo $product['id']; ?>">
-                                    <button type="submit" name="delete_product" class="btn btn-sm btn-danger delete-btn">
+                                    <button type="submit" name="delete_product" class="btn btn-sm btn-danger delete-btn"
+                                        onclick="return confirmAction(this, 'Bu ürünü silmek istediğinize emin misiniz?');">
                                         <i class="fas fa-trash"></i><span class="d-none d-lg-inline"> Sil</span>
                                     </button>
                                 </form>
@@ -399,14 +400,38 @@ function toggleStatus(productId, field, value, element) {
         } else {
             // Hata durumunda checkbox'ı eski haline getir
             element.checked = !value;
-            alert('İşlem sırasında bir hata oluştu: ' + (data.error || ''));
+            Swal.fire({
+                title: 'Hata!',
+                text: 'İşlem sırasında bir hata oluştu: ' + (data.error || ''),
+                icon: 'error',
+                confirmButtonText: 'Tamam',
+                confirmButtonColor: '#ff3b30',
+                background: '#ffffff',
+                customClass: {
+                    popup: 'swal2-apple-popup',
+                    confirmButton: 'btn btn-danger px-4 py-2'
+                },
+                buttonsStyling: false
+            });
         }
     })
     .catch(error => {
         console.error('Error:', error);
         // Hata durumunda checkbox'ı eski haline getir
         element.checked = !value;
-        alert('İşlem sırasında bir hata oluştu');
+        Swal.fire({
+            title: 'Hata!',
+            text: 'İşlem sırasında bir hata oluştu',
+            icon: 'error',
+            confirmButtonText: 'Tamam',
+            confirmButtonColor: '#ff3b30',
+            background: '#ffffff',
+            customClass: {
+                popup: 'swal2-apple-popup',
+                confirmButton: 'btn btn-danger px-4 py-2'
+            },
+            buttonsStyling: false
+        });
     });
 }
 </script>

@@ -58,6 +58,78 @@ switch ($page) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .swal2-apple-popup {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            border-radius: 18px !important;
+            padding: 2rem !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1) !important;
+        }
+        .swal2-apple-popup .swal2-title {
+            font-size: 1.3rem !important;
+            font-weight: 600 !important;
+            color: var(--text) !important;
+            padding-top: 0.5rem !important;
+        }
+        .swal2-apple-popup .swal2-html-container {
+            font-size: 0.95rem !important;
+            color: var(--text-muted) !important;
+        }
+        .swal2-apple-popup .swal2-icon {
+            border-width: 2px !important;
+            margin-top: 0.5rem !important;
+        }
+        .swal2-apple-popup .swal2-actions {
+            margin-top: 1.5rem !important;
+            gap: 10px;
+        }
+    </style>
+    <script>
+        function confirmAction(element, message) {
+            const evt = window.event || (arguments.callee.caller ? arguments.callee.caller.arguments[0] : null);
+            if (evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+            }
+
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: message || 'Bu işlemi gerçekleştirmek istediğinize emin misiniz?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff3b30', // Apple Danger
+                cancelButtonColor: '#86868b',  // Apple Secondary
+                confirmButtonText: 'Evet, Devam Et',
+                cancelButtonText: 'İptal',
+                background: '#ffffff',
+                customClass: {
+                    popup: 'swal2-apple-popup',
+                    confirmButton: 'btn btn-danger px-4 py-2',
+                    cancelButton: 'btn btn-light text-dark px-4 py-2 border'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (element.tagName === 'A') {
+                        window.location.href = element.href;
+                    } else if (element.form || element.closest('form')) {
+                        const form = element.form || element.closest('form');
+                        if (element.name) {
+                            const hiddenInput = document.createElement('input');
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.name = element.name;
+                            hiddenInput.value = element.value || '1';
+                            form.appendChild(hiddenInput);
+                        }
+                        form.submit();
+                    }
+                }
+            });
+            return false;
+        }
+    </script>
 </head>
 
 <body>

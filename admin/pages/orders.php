@@ -90,7 +90,7 @@ $stmt->execute($params);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Sipariş detaylarını al
-function getOrderItems($db, $order_id)
+function getOrderItems(PDO $db, int $order_id)
 {
     $stmt = $db->prepare("SELECT * FROM order_items WHERE order_id = ?");
     $stmt->execute([$order_id]);
@@ -99,6 +99,14 @@ function getOrderItems($db, $order_id)
 ?>
 
 <div class="container-fluid">
+    <?php if (isset($_SESSION['success'])): ?>
+        <?php echo successMessage($_SESSION['success']);
+        unset($_SESSION['success']); ?>
+    <?php endif; ?>
+    <?php if (isset($_SESSION['error'])): ?>
+        <?php echo errorMessage($_SESSION['error']);
+        unset($_SESSION['error']); ?>
+    <?php endif; ?>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0">
             <?php
@@ -123,11 +131,11 @@ function getOrderItems($db, $order_id)
         </h4>
         <div class="d-flex gap-2">
             <?php if ($status_filter == 'cancelled' && count($orders) > 0): ?>
-                <form action="?page=orders" method="POST"
-                    onsubmit="return confirm('İptal edilen TÜM siparişleri silmek istediğinize emin misiniz? Bu işlem geri alınamaz!');">
+                <form action="?page=orders" method="POST">
                     <input type="hidden" name="csrf_token" value="<?php echo createCSRFToken(); ?>">
                     <input type="hidden" name="delete_all_cancelled" value="1">
-                    <button type="submit" class="btn btn-danger">
+                    <button type="submit" class="btn btn-danger"
+                        onclick="return confirmAction(this, 'İptal edilen TÜM siparişleri silmek istediğinize emin misiniz? Bu işlem geri alınamaz!');">
                         <i class="fas fa-trash-alt me-2"></i>Tümünü Sil
                     </button>
                 </form>
@@ -255,7 +263,7 @@ function getOrderItems($db, $order_id)
 
                                 <?php if ($order['status'] == 'completed' || $order['status'] == 'cancelled'): ?>
                                     <button type="submit" name="delete_order" value="1" class="btn btn-sm btn-outline-danger w-100"
-                                        onclick="return confirm('Bu siparişi kalıcı olarak silmek istediğinize emin misiniz?');">
+                                        onclick="return confirmAction(this, 'Bu siparişi kalıcı olarak silmek istediğinize emin misiniz?');">
                                         <i class="fas fa-trash-alt me-1"></i>Sil
                                     </button>
                                 <?php endif; ?>

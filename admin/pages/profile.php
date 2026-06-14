@@ -64,7 +64,7 @@ if (isset($_POST['update_profile'])) {
             $_SESSION['admin']['username'] = $username;
 
             $_SESSION['success'] = "Profil başarıyla güncellendi!";
-            header("Location: profile.php");
+            header("Location: ?page=profile");
             exit;
         } catch (PDOException $e) {
             $errors[] = "Güncelleme sırasında bir hata oluştu!";
@@ -85,19 +85,15 @@ if (isset($_POST['update_profile'])) {
                 <div class="card-body">
                     <?php if(isset($errors)): ?>
                         <?php foreach($errors as $error): ?>
-                            <div class="alert alert-danger">
-                                <?php echo $error; ?>
-                            </div>
+                            <?php echo errorMessage($error); ?>
                         <?php endforeach; ?>
                     <?php endif; ?>
 
                     <?php if(isset($_SESSION['success'])): ?>
-                        <div class="alert alert-success">
-                            <?php 
-                            echo $_SESSION['success'];
-                            unset($_SESSION['success']);
-                            ?>
-                        </div>
+                        <?php 
+                        echo successMessage($_SESSION['success']);
+                        unset($_SESSION['success']);
+                        ?>
                     <?php endif; ?>
 
                     <form action="" method="post">

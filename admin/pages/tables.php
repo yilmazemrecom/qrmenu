@@ -113,6 +113,10 @@ ksort($tables, SORT_NUMERIC); // Masaları numaraya göre sırala
         <?php echo successMessage($_SESSION['success']);
         unset($_SESSION['success']); ?>
     <?php endif; ?>
+    <?php if (isset($_SESSION['error'])): ?>
+        <?php echo errorMessage($_SESSION['error']);
+        unset($_SESSION['error']); ?>
+    <?php endif; ?>
 
     <?php if (empty($tables)): ?>
         <div class="alert alert-info text-center py-5">
@@ -182,8 +186,7 @@ ksort($tables, SORT_NUMERIC); // Masaları numaraya göre sırala
                                     class="h4 mb-0 fw-bold text-primary"><?php echo number_format($data['total_amount'], 2); ?>
                                     ₺</span>
                             </div>
-                            <form method="POST"
-                                onsubmit="return confirm('Masa <?php echo $table_no; ?> hesabını kapatmak ve masayı boşaltmak istediğinize emin misiniz?');">
+                            <form method="POST">
                                 <input type="hidden" name="csrf_token" value="<?php echo createCSRFToken(); ?>">
                                 <input type="hidden" name="table_no" value="<?php echo $table_no; ?>">
                                 <?php if ($data['has_pending']): ?>
@@ -192,7 +195,8 @@ ksort($tables, SORT_NUMERIC); // Masaları numaraya göre sırala
                                         Sipariş tamamlanmalı
                                     </div>
                                 <?php else: ?>
-                                    <button type="submit" name="close_table" class="btn btn-success w-100 py-2">
+                                    <button type="submit" name="close_table" class="btn btn-success w-100 py-2"
+                                        onclick="return confirmAction(this, 'Masa <?php echo $table_no; ?> hesabını kapatmak ve masayı boşaltmak istediğinize emin misiniz?');">
                                         <i class="fas fa-cash-register me-2"></i>Hesabı Al ve Kapat
                                     </button>
                                 <?php endif; ?>

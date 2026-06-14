@@ -99,8 +99,8 @@ $categories = $db->query("
                                     <i class="fas fa-edit"></i>  
                                 </button>  
                                 <a href="?page=categories&action=delete&id=<?php echo $category['id']; ?>"   
-                                   class="btn btn-sm btn-danger delete-btn"
-                                   onclick="return confirm('Bu kategoriyi silmek istediğinize emin misiniz? Altındaki ürünler silinmeyecektir.')">  
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirmAction(this, 'Bu kategoriyi silmek istediğinize emin misiniz? Altındaki ürünler silinmeyecektir.');">  
                                     <i class="fas fa-trash"></i>  
                                 </a>  
                             </td>  

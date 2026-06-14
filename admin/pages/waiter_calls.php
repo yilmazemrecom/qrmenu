@@ -4,7 +4,7 @@ if (isset($_GET['complete']) && is_numeric($_GET['complete'])) {
     $id = $_GET['complete'];
     $update = $db->prepare("UPDATE waiter_calls SET status = 1 WHERE id = ?");
     if ($update->execute([$id])) {
-        echo '<div class="alert alert-success">Çağrı tamamlandı olarak işaretlendi.</div>';
+        echo successMessage("Çağrı tamamlandı olarak işaretlendi.");
     }
 }
 
@@ -13,7 +13,7 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $id = $_GET['delete'];
     $delete = $db->prepare("DELETE FROM waiter_calls WHERE id = ?");
     if ($delete->execute([$id])) {
-        echo '<div class="alert alert-success">Çağrı silindi.</div>';
+        echo successMessage("Çağrı silindi.");
     }
 }
 
@@ -142,7 +142,7 @@ $completedCalls = $db->query("SELECT * FROM waiter_calls WHERE status = 1 ORDER 
                                     <td class="text-end">
                                         <a href="?page=waiter_calls&delete=<?= $call['id']; ?>"
                                             class="btn btn-outline-danger btn-sm"
-                                            onclick="return confirm('Silmek istediğinize emin misiniz?');">
+                                            onclick="return confirmAction(this, 'Silmek istediğinize emin misiniz?');">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </td>

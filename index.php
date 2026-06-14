@@ -112,7 +112,10 @@ if (count($recommended_products) > 0):
     </div>
 
     <div class="categories-container">
-        <?php foreach ($categories as $category): ?>
+        <?php 
+        $categories = $categories ?? [];
+        foreach ($categories as $category): 
+        ?>
             <a href="category.php?id=<?php echo $category['id']; ?>" class="category-box">
                 <div class="category-name"><?php echo $category['name']; ?></div>
             </a>
