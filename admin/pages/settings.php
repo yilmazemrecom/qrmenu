@@ -36,8 +36,7 @@ if (isset($_POST['db_cleanup'])) {
         
         // 1. Siparişleri temizle
         if ($clear_orders) {
-            // Önce ilişkisel order_items kayıtlarını sil (yabancı anahtar çakışmasını veya artık veriyi önlemek için)
-            $subquery = "SELECT id FROM orders WHERE status IN ('completed', 'cancelled') $date_condition";
+            $subquery = "SELECT id FROM orders WHERE 1=1 $date_condition";
             $stmtItems = $db->query($subquery);
             $order_ids = $stmtItems->fetchAll(PDO::FETCH_COLUMN);
             
@@ -268,7 +267,7 @@ if (isset($_POST['update_settings'])) {
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="checkbox" name="clear_orders" id="clear_orders" value="1" checked>
                             <label class="form-check-label" for="clear_orders">
-                                Tamamlanan ve İptal Edilen Siparişler <span class="text-muted">(Sipariş Ürünleriyle Birlikte)</span>
+                                Tüm Siparişler <span class="text-muted">(Sipariş Ürünleriyle Birlikte)</span>
                             </label>
                         </div>
                         <div class="form-check">
